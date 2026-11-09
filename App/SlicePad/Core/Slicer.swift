@@ -465,13 +465,27 @@ public func sliceModel(mesh: Mesh, settings: SliceSettings, templates: TemplateS
 
     // Two-pass time accounting: estimate the start/end sequences and each
     // layer chunk, so M73 remaining-minutes and the header total agree
-    // with the final estimate over the whole emitted file.
-    let estStart = estimateTimeSeconds(gcode: startRendered + "\n" + filamentStartRendered)
+    // with the final estimate over the whole emitted file. The estimator
+    // state is THREADED through the chunks (positions, modal feedrate,
+    // absolute/relative modes, planner exit speed) — a G-code program is
+    // one continuous stream, and restarting the state per chunk invents
+    // phantom E deltas against absolute-E coordinates.
+    var estState = EstimatorState()
+    let startEst = estimateTimeSeconds(gcode: startRendered + "\n" + filamentStartRendered, initialState: estState)
+    estState = startEst.endState
+    // The preamble lines that sit between the start sequence and the body
+    // in the assembled file (they reset E mode/origin; zero time themselves).
+    let preambleEst = estimateTimeSeconds(gcode: "M82\nG92 E0\nM624 model", initialState: estState)
+    estState = preambleEst.endState
     var chunkEst: [Double] = []
     for li in 0..<layerCount {
-        chunkEst.append(estimateTimeSeconds(gcode: layerHeaders[li] + "\n" + chunks[li]))
+        let r = estimateTimeSeconds(gcode: layerHeaders[li] + "\n" + chunks[li], initialState: estState)
+        estState = r.endState
+        chunkEst.append(r.seconds)
     }
-    let estEnd = estimateTimeSeconds(gcode: filamentEndRendered + "\n" + endRendered)
+    let endEst = estimateTimeSeconds(gcode: filamentEndRendered + "\n" + endRendered, initialState: estState)
+    let estStart = startEst.seconds + preambleEst.seconds
+    let estEnd = endEst.seconds
     let totalEst = estStart + chunkEst.reduce(0, +) + estEnd
 
     let modelName = mesh.name.isEmpty ? "model" : mesh.name

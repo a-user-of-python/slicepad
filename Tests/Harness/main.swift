@@ -160,10 +160,13 @@ check("temps_in_start", gcode.contains("M140 S65") && gcode.contains("220"),
 
 check("estimate_sane", cubeResult.estimatedSeconds >= 240 && cubeResult.estimatedSeconds <= 5400,
       "SlicePad estimate \(Int(cubeResult.estimatedSeconds)) s")
-// Golden reference (Bambu Studio 2.9.1, same cube/profiles): prediction
-// 1760 s, 1257.57 mm / ~3.81 g. Printed for comparison, not asserted —
+// Golden reference (Bambu Studio 2.9.1, same cube, profiles resolved
+// with inherits intact): prediction 981 s, ~3.81 g / 1257.57 mm. (An
+// earlier CLI run whose filament preset lost its inherits — cap
+// collapsed to 2 mm3/s — predicted 1760 s; that figure is a Studio CLI
+// artifact, not the reference.) Printed for comparison, not asserted —
 // SlicePad's estimator is a simpler accel model over its own move list.
-info("cube estimate: SlicePad \(Int(cubeResult.estimatedSeconds)) s vs Bambu Studio golden 1760 s")
+info("cube estimate: SlicePad \(Int(cubeResult.estimatedSeconds)) s vs Bambu Studio golden 981 s")
 info("cube filament: SlicePad \(String(format: "%.2f", cubeResult.filamentUsedGrams)) g (\(String(format: "%.1f", cubeResult.filamentUsedMM)) mm) vs golden ~3.81 g (1257.57 mm)")
 
 check("filament_used_range", cubeResult.filamentUsedGrams > 3 && cubeResult.filamentUsedGrams < 20,

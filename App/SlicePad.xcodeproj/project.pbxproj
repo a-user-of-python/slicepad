@@ -9,7 +9,6 @@
 /* Begin PBXFileReference section */
 		B00000000000000000000004 /* SlicePad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlicePad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B00000000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B00000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +39,6 @@
 			children = (
 				B00000000000000000000007 /* SlicePad */,
 				B00000000000000000000005 /* Info.plist */,
-				B00000000000000000000006 /* Assets.xcassets */,
 				B00000000000000000000003 /* Products */,
 			);
 			sourceTree = "<group>";

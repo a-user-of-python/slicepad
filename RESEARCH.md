@@ -288,7 +288,13 @@ that machine (see §8).
    `url`/`ams_mapping` dialect question in §6.
 3. Plain `.gcode`, external spool, touchscreen start (the fallback's
    claim).
-4. Time-estimate accuracy vs the printer's own countdown.
+4. Time-estimate accuracy vs the printer's own countdown. (Reference
+   anchor from a genuine Bambu Studio 2.9.1 slice of a 20 mm cube on
+   these profiles: **981 s**. Caution for anyone reproducing it via
+   Studio's CLI: `--load-filaments` drops the filament preset's
+   `inherits`, collapsing its volumetric cap to 2 mm³/s and its density
+   to 0 — that run predicts 1760 s and is a CLI artifact, not a
+   reference. Load `Bambu PLA Basic @base.json` to keep the chain.)
 
 Until test 1 passes, the README says — truthfully — that printer
 verification is pending.

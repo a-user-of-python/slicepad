@@ -40,15 +40,37 @@ private func wordValue(_ tokens: [String], _ letter: Character) -> Double? {
     return nil
 }
 
+/// Parser + planner state carried between chunks. A G-code program is a
+/// single modal stream (positions, feedrate, absolute/relative modes and
+/// the planner's exit speed all persist across any split), so chunked
+/// estimation MUST thread this state — restarting it per chunk makes the
+/// first absolute-E move of every chunk measure its delta from E0, which
+/// invents kilometres of phantom filament motion (found the hard way:
+/// per-layer chunks summed to ~6x the whole-file estimate).
+public struct EstimatorState {
+    public var posX = 0.0, posY = 0.0, posZ = 0.0, posE = 0.0
+    public var feedMMMin = 0.0
+    public var absoluteXYZ = true
+    public var absoluteE = true
+    public var prevExit = 0.0
+    public init() {}
+}
+
 /// Estimate the execution time (seconds) of a complete G-code program.
 public func estimateTimeSeconds(gcode: String) -> Double {
+    estimateTimeSeconds(gcode: gcode, initialState: EstimatorState()).seconds
+}
+
+/// Estimate one chunk of a program, threading modal state in and out.
+public func estimateTimeSeconds(gcode: String, initialState: EstimatorState) -> (seconds: Double, endState: EstimatorState) {
+    var state = initialState
     var moves: [EstMove] = []
     var dwell: Double = 0
 
-    var posX = 0.0, posY = 0.0, posZ = 0.0, posE = 0.0
-    var feedMMMin = 0.0
-    var absoluteXYZ = true
-    var absoluteE = true
+    var posX = state.posX, posY = state.posY, posZ = state.posZ, posE = state.posE
+    var feedMMMin = state.feedMMMin
+    var absoluteXYZ = state.absoluteXYZ
+    var absoluteE = state.absoluteE
 
     for rawLine in gcode.components(separatedBy: "\n") {
         var line = rawLine
@@ -106,7 +128,7 @@ public func estimateTimeSeconds(gcode: String) -> Double {
 
     // Trapezoidal pass with junction-limited exit speeds.
     var total = dwell
-    var prevExit = 0.0
+    var prevExit = state.prevExit
     for i in 0..<moves.count {
         let m = moves[i]
         var exitSpeed = 0.0
@@ -135,5 +157,9 @@ public func estimateTimeSeconds(gcode: String) -> Double {
         }
         prevExit = exitV
     }
-    return total
+    state.posX = posX; state.posY = posY; state.posZ = posZ; state.posE = posE
+    state.feedMMMin = feedMMMin
+    state.absoluteXYZ = absoluteXYZ; state.absoluteE = absoluteE
+    state.prevExit = prevExit
+    return (total, state)
 }
