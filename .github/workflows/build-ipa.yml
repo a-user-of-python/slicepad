@@ -1,0 +1,54 @@
+name: Build IPA
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  host-tests:
+    name: Slicer core host tests
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build harness (slicer core, plain swiftc)
+        run: |
+          swiftc -O -o slicer-harness App/SlicePad/Core/*.swift Tests/Harness/main.swift
+      - name: Run harness
+        run: ./slicer-harness "$PWD"
+      - name: Upload sample outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-outputs
+          path: harness-out/
+          if-no-files-found: ignore
+
+  build:
+    name: Unsigned IPA
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build app (unsigned)
+        run: |
+          xcodebuild -project App/SlicePad.xcodeproj \
+            -scheme SlicePad \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Package IPA
+        run: |
+          APP_PATH="build/dd/Build/Products/Release-iphoneos/SlicePad.app"
+          test -d "$APP_PATH"
+          rm -rf Payload SlicePad-unsigned.ipa
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -qry SlicePad-unsigned.ipa Payload
+          ls -lh SlicePad-unsigned.ipa
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: SlicePad-unsigned
+          path: SlicePad-unsigned.ipa
