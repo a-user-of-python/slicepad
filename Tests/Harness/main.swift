@@ -230,5 +230,13 @@ for seg in frameAudit.segments where abs(seg.z - 0.6) < 0.01 {
 }
 check("frame_hole_respected", holeOK)
 
+// MARK: - Sample outputs for CI artifact inspection
+
+let outDir = root + "/harness-out"
+try? FileManager.default.createDirectory(atPath: outDir, withIntermediateDirectories: true)
+try? cubeResult.gcode.write(toFile: outDir + "/cube20.gcode", atomically: true, encoding: .utf8)
+try? frameResult.gcode.write(toFile: outDir + "/frame.gcode", atomically: true, encoding: .utf8)
+try? threeMF.write(to: URL(fileURLWithPath: outDir + "/cube20.gcode.3mf"))
+
 print(failures == 0 ? "HARNESS RESULT: PASS" : "HARNESS RESULT: FAIL (\(failures) failures)")
 exit(failures == 0 ? 0 : 1)
