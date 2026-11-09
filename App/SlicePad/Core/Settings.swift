@@ -31,7 +31,7 @@ public enum FilamentPresets {
     /// density 1.26 (Bambu PLA Basic @base.json filament_density),
     /// filament_id GFA00 (@base.json).
     public static let bambuPLABasic = FilamentPreset(
-        id: "GFA00", displayName: "Bambu PLA Basic", type: "PLA", colorHex: "#FFFFFF",
+        id: "GFA00", displayName: "Bambu PLA Basic", type: "PLA", colorHex: "#00AE42",
         nozzleTemp: 220, bedTemp: 65, flowRatio: 0.98, maxVolumetric: 21, density: 1.26)
 
     /// Generic PLA @BBL A1M — nozzle 220, textured bed 65, flow ratio 0.98
