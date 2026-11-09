@@ -268,7 +268,7 @@ final class AppModel: ObservableObject {
         defer { if accessed { url.stopAccessingSecurityScopedResource() } }
         do {
             let data = try Data(contentsOf: url)
-            let loaded = loadSTL(data: data, name: url.lastPathComponent)
+            let loaded = try loadSTL(data: data, name: url.lastPathComponent)
             mesh = loaded
             result = nil
             statusText = "Loaded \(loaded.name) — \(loaded.triangles.count) triangles. Ready to slice."

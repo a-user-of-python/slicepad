@@ -57,13 +57,13 @@ final class PrinterConnection {
             { _, _, complete in complete(true) },
             DispatchQueue.main
         )
-        let parameters = NWParameters(tls: tlsOptions, tcp: .default)
+        let parameters = NWParameters(tls: tlsOptions, tcp: NWProtocolTCP.Options())
 
         guard let port = NWEndpoint.Port(rawValue: 8883) else { return }
         let conn = NWConnection(host: NWEndpoint.Host(host), port: port, using: parameters)
         connection = conn
 
-        conn.stateUpdateHandler = { [weak self] state in
+        conn.stateUpdateHandler = { [weak self] (state: NWConnection.State) in
             guard let self else { return }
             switch state {
             case .ready:
@@ -79,7 +79,7 @@ final class PrinterConnection {
                 break
             }
         }
-        conn.start(queue: .main)
+        conn.start(queue: DispatchQueue.main)
         log("Connecting to \(host):8883 …")
     }
 

@@ -254,7 +254,7 @@ final class FTPUploader {
             { _, _, complete in complete(true) },
             DispatchQueue.main
         )
-        let parameters = NWParameters(tls: tlsOptions, tcp: .default)
+        let parameters = NWParameters(tls: tlsOptions, tcp: NWProtocolTCP.Options())
         return NWConnection(host: NWEndpoint.Host(host),
                             port: NWEndpoint.Port(rawValue: port)!,
                             using: parameters)
