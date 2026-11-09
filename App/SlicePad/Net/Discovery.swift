@@ -85,10 +85,11 @@ enum Discovery {
         while Date() < deadline {
             var sender = sockaddr_in()
             var senderLen = socklen_t(MemoryLayout<sockaddr_in>.size)
+            let capacity = buffer.count
             let received = withUnsafeMutablePointer(to: &sender) { ptr in
                 ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { senderPtr in
                     buffer.withUnsafeMutableBytes { bytes in
-                        recvfrom(fd, bytes.baseAddress, buffer.count, 0, senderPtr, &senderLen)
+                        recvfrom(fd, bytes.baseAddress, capacity, 0, senderPtr, &senderLen)
                     }
                 }
             }
