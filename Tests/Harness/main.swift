@@ -251,6 +251,39 @@ check("list_excludes_non_stl", !listed.contains { $0.name == "notes.txt" })
 check("list_sizes", listed.first { $0.name == "BRACKET.STL" }?.sizeBytes == Int64(2))
 try? FileManager.default.removeItem(at: listRoot)
 
+// MARK: - Example STL seeding (fresh-install Documents folder)
+
+let seedRoot = FileManager.default.temporaryDirectory
+    .appendingPathComponent("slicepad-seed-test-\(ProcessInfo.processInfo.processIdentifier)")
+let seeded = seedExampleSTLIfNeeded(in: seedRoot)
+check("seed_when_empty", seeded, "no example written into an empty folder")
+let seededList = listLocalSTLFiles(in: seedRoot)
+check("seed_writes_example", seededList.map(\.name) == [exampleSTLFileName],
+      "got \(seededList.map(\.relativePath))")
+if let seededURL = seededList.first?.url, let seededData = try? Data(contentsOf: seededURL),
+   let seededCube = try? loadSTL(data: seededData, name: exampleSTLFileName) {
+    let seededSize = seededCube.maxB - seededCube.minB
+    check("seed_cube_loads", seededCube.triangles.count == 12, "got \(seededCube.triangles.count) triangles")
+    check("seed_cube_is_20mm", abs(seededSize.x - 20) < 1e-6 && abs(seededSize.y - 20) < 1e-6 && abs(seededSize.z - 20) < 1e-6,
+          "got \(seededSize.x)×\(seededSize.y)×\(seededSize.z)")
+} else {
+    check("seed_cube_loads", false, "seeded file did not parse as an STL")
+    check("seed_cube_is_20mm", false, "seeded file did not parse as an STL")
+}
+check("seed_noop_when_present", !seedExampleSTLIfNeeded(in: seedRoot),
+      "seeded again over an existing STL")
+try? FileManager.default.removeItem(at: seedRoot)
+
+// A file arriving via the Inbox (Open-in) also counts as "has an STL".
+let inboxRoot = FileManager.default.temporaryDirectory
+    .appendingPathComponent("slicepad-seed-inbox-\(ProcessInfo.processInfo.processIdentifier)")
+try? FileManager.default.createDirectory(at: inboxRoot.appendingPathComponent("Inbox"),
+                                         withIntermediateDirectories: true)
+try? Data("x".utf8).write(to: inboxRoot.appendingPathComponent("Inbox/delivered.stl"))
+check("seed_skips_when_inbox_has_stl", !seedExampleSTLIfNeeded(in: inboxRoot),
+      "seeded despite an STL in the Inbox")
+try? FileManager.default.removeItem(at: inboxRoot)
+
 // MARK: - Sample outputs for CI artifact inspection
 
 let outDir = root + "/harness-out"

@@ -192,6 +192,15 @@ final class AppModel: ObservableObject {
             self?.isPrinterConnected = connected
             self?.appendLog(connected ? "Printer connected." : "Printer disconnected.")
         }
+
+        // Materialise the shared Documents folder and seed a sample
+        // model: an app's Files folder only appears (for sideloaded
+        // installs) once something has been written into Documents,
+        // and a fresh install otherwise has nothing to slice. Runs on
+        // every launch; seeds only when no STL exists yet.
+        if seedExampleSTLIfNeeded(in: documentsDirectory) {
+            appendLog("Added \(exampleSTLFileName) to the SlicePad folder — open it from Open STL to try a test slice.")
+        }
     }
 
     private func persistSettings() {

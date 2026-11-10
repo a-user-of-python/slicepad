@@ -50,9 +50,14 @@ and the LAN protocol is in [RESEARCH.md](RESEARCH.md).
 The iOS system document picker doesn't open reliably on every install,
 so the primary import path doesn't use it:
 
-1. In the **Files** app, copy your `.stl` into **On My iPad → SlicePad**
+1. **Open SlicePad once after installing it.** An app's Files folder
+   only appears once the app has written into it, so on first launch
+   SlicePad seeds its folder with a sample model (`Example Cube.stl`,
+   a 20 mm cube — handy for a first test slice). From then on the
+   folder exists at **On My iPad → SlicePad** in the Files app.
+2. In the **Files** app, copy your `.stl` into **On My iPad → SlicePad**
    (the app's shared Documents folder).
-2. In SlicePad, tap **Open STL** and pick the file from the in-app list.
+3. In SlicePad, tap **Open STL** and pick the file from the in-app list.
 
 Sharing works too: from Files, a Safari download or anywhere else, use
 **Share → Open in SlicePad** and the file loads directly (it also lands
