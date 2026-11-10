@@ -233,6 +233,24 @@ for seg in frameAudit.segments where abs(seg.z - 0.6) < 0.01 {
 }
 check("frame_hole_respected", holeOK)
 
+// MARK: - Local STL listing (Documents-folder import browser)
+
+let listRoot = FileManager.default.temporaryDirectory
+    .appendingPathComponent("slicepad-list-test-\(ProcessInfo.processInfo.processIdentifier)")
+try? FileManager.default.createDirectory(at: listRoot.appendingPathComponent("Inbox"),
+                                         withIntermediateDirectories: true)
+try? Data("x".utf8).write(to: listRoot.appendingPathComponent("part one.stl"))
+try? Data("xx".utf8).write(to: listRoot.appendingPathComponent("BRACKET.STL"))
+try? Data("xxx".utf8).write(to: listRoot.appendingPathComponent("Inbox/delivered.stl"))
+try? Data("nope".utf8).write(to: listRoot.appendingPathComponent("notes.txt"))
+let listed = listLocalSTLFiles(in: listRoot)
+check("list_finds_all_stl", listed.count == 3, "got \(listed.map(\.relativePath))")
+check("list_includes_inbox", listed.contains { $0.relativePath == "Inbox/delivered.stl" })
+check("list_case_insensitive_ext", listed.contains { $0.name == "BRACKET.STL" })
+check("list_excludes_non_stl", !listed.contains { $0.name == "notes.txt" })
+check("list_sizes", listed.first { $0.name == "BRACKET.STL" }?.sizeBytes == Int64(2))
+try? FileManager.default.removeItem(at: listRoot)
+
 // MARK: - Sample outputs for CI artifact inspection
 
 let outDir = root + "/harness-out"

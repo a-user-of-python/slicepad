@@ -20,7 +20,7 @@ final class AppModel: ObservableObject {
     @Published var mesh: Mesh?
     @Published var result: SliceResult?
     @Published var isSlicing = false
-    @Published var statusText = "Import an STL file to begin."
+    @Published var statusText = "Open an STL file to begin."
     @Published var logLines: [String] = []
 
     @Published var settings: SliceSettings {
@@ -277,6 +277,45 @@ final class AppModel: ObservableObject {
             statusText = "Import failed: \(error.localizedDescription)"
             appendLog("Import failed: \(error.localizedDescription)")
         }
+    }
+
+    // MARK: Local files & Open-In
+
+    /// The app's Documents folder. File sharing is enabled, so this is
+    /// the "SlicePad" folder visible in the Files app (On My iPad →
+    /// SlicePad); STLs copied there are the primary import source for
+    /// the in-app browser, because the system document picker is
+    /// unreliable on some installs.
+    var documentsDirectory: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    }
+
+    /// Every STL in the Documents folder — including the Inbox
+    /// subfolder where iOS drops "Open in" copies — newest first.
+    func localSTLFiles() -> [LocalSTLFile] {
+        listLocalSTLFiles(in: documentsDirectory)
+    }
+
+    func importLocalSTL(_ file: LocalSTLFile) {
+        importSTL(from: file.url)
+    }
+
+    func deleteLocalSTL(_ file: LocalSTLFile) {
+        do {
+            try FileManager.default.removeItem(at: file.url)
+            appendLog("Deleted \(file.relativePath) from the SlicePad folder.")
+        } catch {
+            appendLog("Delete failed: \(error.localizedDescription)")
+        }
+    }
+
+    /// "Open in SlicePad" / share-sheet delivery (wired to .onOpenURL).
+    /// The URL may be security-scoped (opened in place from another
+    /// app's container) or a copy in Documents/Inbox; importSTL handles
+    /// the access for both.
+    func handleIncomingFile(url: URL) {
+        guard url.isFileURL, url.pathExtension.lowercased() == "stl" else { return }
+        importSTL(from: url)
     }
 
     // MARK: Slicing

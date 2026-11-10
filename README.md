@@ -10,8 +10,10 @@ and the LAN protocol is in [RESEARCH.md](RESEARCH.md).
 
 ## What it does
 
-- **STL import** (binary + ASCII) with a Metal 3D preview — orbit, pinch
-  zoom, pan — plus a toolpath view with a layer slider.
+- **STL import** (binary + ASCII) through an in-app file browser over the
+  app's own Documents folder — see *Getting an STL into the app* below —
+  with a Metal 3D preview — orbit, pinch zoom, pan — plus a toolpath view
+  with a layer slider.
 - **Slicing** with the `0.20mm Standard @BBL A1M` profile as the baseline:
   perimeters (2 walls by default), grid infill (15 %), solid top/bottom
   shells, optional skirt/brim. Layer height, walls, infill, temps, flow
@@ -42,6 +44,20 @@ and the LAN protocol is in [RESEARCH.md](RESEARCH.md).
   prints in one job (one AMS slot per print), no tree/organic anything.
 - AMS lite remaining-% is never shown: the printer doesn't report it.
 - Time estimates are estimates — first prints will show how close.
+
+## Getting an STL into the app
+
+The iOS system document picker doesn't open reliably on every install,
+so the primary import path doesn't use it:
+
+1. In the **Files** app, copy your `.stl` into **On My iPad → SlicePad**
+   (the app's shared Documents folder).
+2. In SlicePad, tap **Open STL** and pick the file from the in-app list.
+
+Sharing works too: from Files, a Safari download or anywhere else, use
+**Share → Open in SlicePad** and the file loads directly (it also lands
+in the in-app list). The toolbar's **System File Picker** button remains
+as a fallback for installs where the standard picker works.
 
 ## Printer setup (one time)
 

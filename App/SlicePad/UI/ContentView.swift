@@ -12,6 +12,7 @@ struct ContentView: View {
     @EnvironmentObject private var model: AppModel
 
     @State private var showingImporter = false
+    @State private var showingFileList = false
     @State private var displayMode: PreviewDisplayMode = .mesh
     @State private var layerZ: Double = 0
 
@@ -30,9 +31,16 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
+                        showingFileList = true
+                    } label: {
+                        Label("Open STL", systemImage: "folder")
+                    }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
                         showingImporter = true
                     } label: {
-                        Label("Import STL", systemImage: "square.and.arrow.down")
+                        Label("System File Picker", systemImage: "square.and.arrow.down")
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
@@ -43,6 +51,9 @@ struct ContentView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showingFileList) {
+            STLFileListView()
         }
         .fileImporter(isPresented: $showingImporter,
                       allowedContentTypes: [UTType(filenameExtension: "stl") ?? .item, .item],
@@ -78,7 +89,7 @@ struct ContentView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay {
                     if model.mesh == nil {
-                        Text("Import an STL file to preview it here.")
+                        Text("Open an STL file to preview it here.")
                             .foregroundStyle(.secondary)
                     }
                 }

@@ -14,6 +14,10 @@ struct SlicePadApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(model)
+                .onOpenURL { url in
+                    // "Open in SlicePad" / share-sheet delivery of an STL.
+                    model.handleIncomingFile(url: url)
+                }
         }
     }
 }
